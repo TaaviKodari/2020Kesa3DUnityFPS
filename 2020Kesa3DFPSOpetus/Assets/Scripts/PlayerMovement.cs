@@ -6,9 +6,12 @@ public class PlayerMovement : MonoBehaviour
 {
     public CharacterController controller;
 
-    public float moveSpeed = 8f;
+    public float moveSpeed = 8f, runSpeed = 1.8f;
+
     public float gravity = -9.81f;
     public float jumpHeight = 3f;
+
+    public float pushForce = 5f;
 
     public Transform groundCheck;
     public float groundDistance = 0.4f;
@@ -34,8 +37,17 @@ public class PlayerMovement : MonoBehaviour
         float zAxis = Input.GetAxis("Vertical");
 
         move = transform.right * xAxis + transform.forward * zAxis;
-
-        controller.Move(move * moveSpeed * Time.deltaTime);
+        if (Input.GetButton("Fire3"))
+        {
+            //juostaan
+            controller.Move(move * moveSpeed * runSpeed * Time.deltaTime);
+        }
+        else
+        {
+            //kävellään
+            controller.Move(move * moveSpeed * Time.deltaTime);
+        }
+       
 
         if(Input.GetButtonDown("Jump") && isGrounded)
         {
@@ -51,6 +63,23 @@ public class PlayerMovement : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(groundCheck.position, groundDistance);
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if(hit.collider.gameObject.layer == 8)
+        {
+            return;
+        }
+
+        Rigidbody rb = hit.collider.gameObject.GetComponent<Rigidbody>();
+
+        if(rb == null)
+        {
+            return;
+        }
+        rb.AddForce(move * pushForce);
+
     }
 
 }
